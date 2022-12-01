@@ -4,6 +4,7 @@ using NSE.Identidade.API.DTOs;
 
 namespace NSE.Identidade.API.Controllers;
 
+[ApiController]
 [Route("api/identidade")]
 public class AuthController : Controller
 {
@@ -16,7 +17,7 @@ public class AuthController : Controller
         _userManager = userManager;
     }
 
-    [HttpPost("Autenticar")]
+    [HttpPost("autenticar")]
     public async Task<IActionResult> Login(UsuarioLoginDTO usuarioLogin)
     {
         if (!ModelState.IsValid)
