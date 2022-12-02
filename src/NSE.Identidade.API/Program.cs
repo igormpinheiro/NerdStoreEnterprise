@@ -3,7 +3,7 @@ using NSE.Identidade.API.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 
 //Resolve Dependecies 
-ResolveDependency.ConfigureServices(builder.Services, builder.Configuration);
+ServicesConfig.ConfigureServices(builder.Services, builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddControllers();
