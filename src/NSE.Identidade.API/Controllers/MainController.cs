@@ -6,7 +6,7 @@ namespace NSE.Identidade.API.Controllers;
 [ApiController]
 public abstract class MainController : Controller
 {
-    protected ICollection<string> Errors = new List<string>();
+    private ICollection<string> Errors = new List<string>();
     
     public ActionResult CustomResponse(object result = null)
     {

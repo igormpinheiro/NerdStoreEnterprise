@@ -48,6 +48,7 @@ public class ServicesConfig
     private static void ConfigureIdentity(IServiceCollection services)
     {
         services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddErrorDescriber<IdentityMensagensPortugues>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
         
