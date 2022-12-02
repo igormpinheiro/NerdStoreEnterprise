@@ -10,9 +10,8 @@ using NSE.Identidade.API.Extensions;
 
 namespace NSE.Identidade.API.Controllers;
 
-[ApiController]
 [Route("api/identidade")]
-public class AuthController : Controller
+public class AuthController : MainController
 {
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly UserManager<IdentityUser> _userManager;
@@ -31,23 +30,30 @@ public class AuthController : Controller
     public async Task<IActionResult> Login(UsuarioLoginDTO usuarioLogin)
     {
         if (!ModelState.IsValid)
-            return BadRequest();
+            return CustomResponse(ModelState);
 
         var result = await _signInManager.PasswordSignInAsync(usuarioLogin.Email, usuarioLogin.Senha,
             false,
             true);
 
         if (result.Succeeded)
-            return Ok(await GerarJwt(usuarioLogin.Email));
+            return CustomResponse(await GerarJwt(usuarioLogin.Email));
 
-        return BadRequest();
+        if (result.IsLockedOut)
+        {
+            AdicionarErroProcessamento("Usuário temporariamente bloqueado por tentativas inválidas");
+            return CustomResponse();
+        }
+        
+        AdicionarErroProcessamento("Usuário ou Senha incorretos");
+        return CustomResponse();
     }
 
     [HttpPost("nova-conta")]
     public async Task<ActionResult> Registrar(UsuarioRegistroDTO usuarioRegistro)
     {
         if (!ModelState.IsValid)
-            return BadRequest();
+            return CustomResponse(ModelState);
 
         var user = new IdentityUser()
         {
@@ -59,12 +65,14 @@ public class AuthController : Controller
         var result = await _userManager.CreateAsync(user, usuarioRegistro.Senha);
 
         if (result.Succeeded)
+            return CustomResponse(await GerarJwt(usuarioRegistro.Email));
+
+        foreach (var error in result.Errors)
         {
-            await _signInManager.SignInAsync(user, false);
-            return Ok(await GerarJwt(usuarioRegistro.Email));
+            AdicionarErroProcessamento(error.Description);
         }
 
-        return BadRequest(result.Errors);
+        return CustomResponse();
     }
 
     private async Task<UsuarioLoginRespostaDTO> GerarJwt(string email)
@@ -103,7 +111,7 @@ public class AuthController : Controller
 
 
         var encodedToken = tokenHandler.WriteToken(token);
-        
+
         var response = new UsuarioLoginRespostaDTO
         {
             AccessToken = encodedToken,
@@ -112,7 +120,7 @@ public class AuthController : Controller
             {
                 Id = user.Id,
                 Email = user.Email,
-                Claims = claims.Select(c => new UsuarioClaimDTO {Type = c.Type, Value = c.Value})
+                Claims = claims.Select(c => new UsuarioClaimDTO { Type = c.Type, Value = c.Value })
             }
         };
 
