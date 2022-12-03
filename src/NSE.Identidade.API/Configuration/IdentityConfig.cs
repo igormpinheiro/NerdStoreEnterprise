@@ -8,51 +8,28 @@ using NSE.Identidade.API.Extensions;
 
 namespace NSE.Identidade.API.Configuration;
 
-public class ServicesConfig
+public static class IdentityConfig
 {
-    static IConfigurationSection _appSettingsSection;
-    public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services,
+        IConfiguration configuration)
     {
-        ConfigureAppSettings(services, configuration);
-        ConfigureDatabase(services, configuration);
-        ConfigureIdentity(services);
-        // // Infra - Data
-        // services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-        // services.AddScoped<IUnitOfWork, UnitOfWork>();
-        // services.AddScoped<IdentidadeContext>();
-        //
-        // // Infra - Identity
-        // services.AddScoped<IAspNetUser, AspNetUser>();
-        //
-        // // Services
-        // services.AddScoped<IUsuarioService, UsuarioService>();
-    }
-
-    private static void ConfigureAppSettings(IServiceCollection services, IConfiguration configuration)
-    {
+        //AppSettingsConfig
         var appSettingsSection = configuration.GetSection("AppSettings");
-
         services.Configure<AppSettings>(appSettingsSection);
 
-        _appSettingsSection = appSettingsSection;
-    }
-
-    private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration)
-    {
+        //DatabaseConfig
         services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         });
-    }
 
-    private static void ConfigureIdentity(IServiceCollection services)
-    {
+        //IdentityConfig
         services.AddIdentity<IdentityUser, IdentityRole>()
             .AddErrorDescriber<IdentityMensagensPortugues>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-        
-        var appSettings = _appSettingsSection.Get<AppSettings>();
+
+        var appSettings = appSettingsSection.Get<AppSettings>();
         var key = Encoding.ASCII.GetBytes(appSettings.Secret);
 
         services.AddAuthentication(options =>
@@ -74,5 +51,15 @@ public class ServicesConfig
                 ValidIssuer = appSettings.Emissor
             };
         });
+
+        return services;
+    }
+    
+    public static IApplicationBuilder UseIdentityConfiguration(this IApplicationBuilder app)
+    {
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        return app;
     }
 }
