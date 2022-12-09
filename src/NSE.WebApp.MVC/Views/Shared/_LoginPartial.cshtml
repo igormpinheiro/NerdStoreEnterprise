@@ -1,0 +1,29 @@
+﻿@using NSE.WebApp.MVC.Extensions
+@inject IUser AppUser
+
+@if (AppUser.IsAuthenticated())
+{
+    <div>
+        <vc:shopping-cart />
+    </div>
+    <div>
+        <div class="dropdown d-inline-block">
+            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Olá, @AppUser.Name </a>
+            <div class="dropdown-menu dropdown-menu-left" x-placement="bottom-end" style="position: absolute; will-change: transform; top: 12px; left: 91px; transform: translate3d(150px, 32px, 0px);">
+                <a class="dropdown-item" href="#">My Profile</a>
+                <a class="dropdown-item" asp-controller="Identity" asp-action="Logout">Sign out</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="widget-header">
+        <small class="title text-muted">Welcome!</small>
+        <div>
+            <a asp-controller="Identity" asp-action="Register">Create account</a> <span> | </span>
+            <a asp-controller="Identity" asp-action="Login"> Sign In</a>
+        </div>
+    </div>
+}
