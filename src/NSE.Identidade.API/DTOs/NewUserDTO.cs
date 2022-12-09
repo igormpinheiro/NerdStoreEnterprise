@@ -2,16 +2,16 @@
 
 namespace NSE.Identidade.API.DTOs;
 
-public class UsuarioRegistroDTO
+public class NewUserDTO
 {
-    public UsuarioRegistroDTO(string email, string senha, string senhaConfirmacao)
+    public NewUserDTO(string email, string password, string confirmPassword)
     {
         Email = email;
-        Senha = senha;
-        SenhaConfirmacao = senhaConfirmacao;
+        Password = password;
+        ConfirmPassword = confirmPassword;
     }
     
-    public UsuarioRegistroDTO() { }
+    public NewUserDTO() { }
     
     [Required(ErrorMessage = "O campo {0} é obrigatório")]
     [EmailAddress(ErrorMessage = "O campo {0} está em um formato inválido")] 
@@ -19,9 +19,9 @@ public class UsuarioRegistroDTO
     
     [Required(ErrorMessage = "O campo {0} é obrigatório")]
     [StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
-    public string Senha { get; set; } = null!;
+    public string Password { get; set; } = null!;
     
     [StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
-    [Compare("Senha", ErrorMessage = "As senhas não conferem.")]
-    public string SenhaConfirmacao { get; set; } = null!;
+    [Compare("Password", ErrorMessage = "As senhas não conferem.")]
+    public string ConfirmPassword { get; set; } = null!;
 }

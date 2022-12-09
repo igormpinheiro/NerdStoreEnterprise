@@ -2,15 +2,15 @@
 
 namespace NSE.Identidade.API.DTOs;
 
-public class UsuarioLoginDTO
+public class UserLoginDTO
 {
-    public UsuarioLoginDTO(string email, string senha)
+    public UserLoginDTO(string email, string senha)
     {
         Email = email;
-        Senha = senha;
+        Password = senha;
     }
 
-    public UsuarioLoginDTO() {}
+    public UserLoginDTO() {}
 
     [Required(ErrorMessage = "O campo {0} é obrigatório")]
     [EmailAddress(ErrorMessage = "O campo {0} está em um formato inválido")]
@@ -18,5 +18,5 @@ public class UsuarioLoginDTO
 
     [Required(ErrorMessage = "O campo {0} é obrigatório")]
     [StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
-    public string Senha { get; set; } = null!;
+    public string Password { get; set; } = null!;
 }

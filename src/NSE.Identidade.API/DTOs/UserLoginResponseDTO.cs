@@ -1,20 +1,20 @@
 ﻿namespace NSE.Identidade.API.DTOs;
 
-public class UsuarioLoginRespostaDTO
+public class UserLoginResponseDTO
 {
     public string AccessToken { get; set; }
     public double ExpiresIn { get; set; }
-    public UsuarioTokenDTO UsuarioToken { get; set; }
+    public UserToken UsuarioToken { get; set; }
 }
 
-public class UsuarioTokenDTO
+public class UserToken
 {
     public string Id { get; set; }
     public string Email { get; set; }
-    public IEnumerable<UsuarioClaimDTO> Claims { get; set; }
+    public IEnumerable<UserClaim> Claims { get; set; }
 }
 
-public class UsuarioClaimDTO
+public class UserClaim
 {
     public string Value { get; set; }
     public string Type { get; set; }

@@ -10,7 +10,7 @@ using NSE.Identidade.API.Extensions;
 
 namespace NSE.Identidade.API.Controllers;
 
-[Route("api/identidade")]
+[Route("api/identity")]
 public class AuthController : MainController
 {
     private readonly SignInManager<IdentityUser> _signInManager;
@@ -26,18 +26,18 @@ public class AuthController : MainController
         _appSettings = appSettings.Value;
     }
 
-    [HttpPost("autenticar")]
-    public async Task<IActionResult> Login(UsuarioLoginDTO usuarioLogin)
+    [HttpPost("auth")]
+    public async Task<IActionResult> Login(UserLoginDTO userLogin)
     {
         if (!ModelState.IsValid)
             return CustomResponse(ModelState);
 
-        var result = await _signInManager.PasswordSignInAsync(usuarioLogin.Email, usuarioLogin.Senha,
+        var result = await _signInManager.PasswordSignInAsync(userLogin.Email, userLogin.Password,
             false,
             true);
 
         if (result.Succeeded)
-            return CustomResponse(await GerarJwt(usuarioLogin.Email));
+            return CustomResponse(await GerarJwt(userLogin.Email));
 
         if (result.IsLockedOut)
         {
@@ -45,27 +45,27 @@ public class AuthController : MainController
             return CustomResponse();
         }
         
-        AdicionarErroProcessamento("Usuário ou Senha incorretos");
+        AdicionarErroProcessamento("Usuário ou Password incorretos");
         return CustomResponse();
     }
 
-    [HttpPost("nova-conta")]
-    public async Task<ActionResult> Registrar(UsuarioRegistroDTO usuarioRegistro)
+    [HttpPost("register")]
+    public async Task<ActionResult> Registrar(NewUserDTO newUser)
     {
         if (!ModelState.IsValid)
             return CustomResponse(ModelState);
 
         var user = new IdentityUser()
         {
-            UserName = usuarioRegistro.Email,
-            Email = usuarioRegistro.Email,
+            UserName = newUser.Email,
+            Email = newUser.Email,
             EmailConfirmed = true
         };
 
-        var result = await _userManager.CreateAsync(user, usuarioRegistro.Senha);
+        var result = await _userManager.CreateAsync(user, newUser.Password);
 
         if (result.Succeeded)
-            return CustomResponse(await GerarJwt(usuarioRegistro.Email));
+            return CustomResponse(await GerarJwt(newUser.Email));
 
         foreach (var error in result.Errors)
         {
@@ -75,7 +75,7 @@ public class AuthController : MainController
         return CustomResponse();
     }
 
-    private async Task<UsuarioLoginRespostaDTO> GerarJwt(string email)
+    private async Task<UserLoginResponseDTO> GerarJwt(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);
         var claims = await _userManager.GetClaimsAsync(user);
@@ -112,15 +112,15 @@ public class AuthController : MainController
 
         var encodedToken = tokenHandler.WriteToken(token);
 
-        var response = new UsuarioLoginRespostaDTO
+        var response = new UserLoginResponseDTO
         {
             AccessToken = encodedToken,
             ExpiresIn = TimeSpan.FromHours(_appSettings.ExpiracaoHoras).TotalSeconds,
-            UsuarioToken = new UsuarioTokenDTO
+            UsuarioToken = new UserToken
             {
                 Id = user.Id,
                 Email = user.Email,
-                Claims = claims.Select(c => new UsuarioClaimDTO { Type = c.Type, Value = c.Value })
+                Claims = claims.Select(c => new UserClaim { Type = c.Type, Value = c.Value })
             }
         };
 
