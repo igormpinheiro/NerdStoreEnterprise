@@ -25,8 +25,8 @@ public class ExceptionMiddleware
 	{
 		if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 		{
-			context.Response.Redirect("/login");
-			return Task.CompletedTask;
+            context.Response.Redirect($"/login?ReturnUrl={context.Request.Path}");
+            return Task.CompletedTask;
 		}
 
 		context.Response.StatusCode = (int)ex.StatusCode;
