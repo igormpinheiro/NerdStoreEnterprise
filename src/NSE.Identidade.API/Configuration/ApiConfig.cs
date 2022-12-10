@@ -1,4 +1,6 @@
-﻿namespace NSE.Identidade.API.Configuration;
+﻿using NSE.WebAPI.Core.Identity;
+
+namespace NSE.Identidade.API.Configuration;
 
 public static class ApiConfig
 {
@@ -32,7 +34,7 @@ public static class ApiConfig
 
         // app.UseCors("Development");
 
-        app.UseIdentityConfiguration();
+        app.UseAuthConfiguration();
 
         app.UseEndpoints(endpoints =>
         {

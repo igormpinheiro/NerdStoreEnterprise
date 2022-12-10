@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NSE.Catalogo.API.Data;
+using NSE.WebAPI.Core.Identity;
 
 namespace NSE.Catalogo.API.Configurations;
 
@@ -23,6 +24,8 @@ public static class ApiConfig
                     .AllowAnyMethod()
                     .AllowAnyHeader());
         });
+        
+        services.AddJwtConfiguration(configuration);
 
         //services.AddResponseCompression();
 
@@ -35,11 +38,11 @@ public static class ApiConfig
     {
         app.UseHttpsRedirection();
 
-        app.UseAuthorization();
-
         app.UseRouting();
 
         app.UseCors("Total");
+        
+        app.UseAuthConfiguration();
 
         app.UseEndpoints(endpoints =>
         {

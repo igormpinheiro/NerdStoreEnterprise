@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NSE.Identidade.API.DTOs;
-using NSE.Identidade.API.Extensions;
+using NSE.WebAPI.Core.Identity;
 
 namespace NSE.Identidade.API.Controllers;
 
@@ -44,7 +44,7 @@ public class AuthController : MainController
             AdicionarErroProcessamento("Usuário temporariamente bloqueado por tentativas inválidas");
             return CustomResponse();
         }
-        
+
         AdicionarErroProcessamento("Usuário ou Password incorretos");
         return CustomResponse();
     }

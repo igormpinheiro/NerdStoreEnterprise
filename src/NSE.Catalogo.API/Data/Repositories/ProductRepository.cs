@@ -28,13 +28,11 @@ namespace NSE.Catalogo.API.Data.Repositories
         public async void Add(Product product)
         {
             _context.Products.Add(product);
-            await _context.SaveChangesAsync();
         }
 
         public async void Update(Product product)
         {
             _context.Products.Update(product);
-            await _context.SaveChangesAsync();
         }
 
         public void Dispose()
