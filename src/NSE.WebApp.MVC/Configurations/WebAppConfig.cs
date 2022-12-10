@@ -13,17 +13,17 @@ public static class WebAppConfig
 
     public static void UseMvcConfiguration(this WebApplication app, IWebHostEnvironment env)
     {
-        //if (!env.IsDevelopment())
-        //{
-        //    app.UseExceptionHandler("/erro/500");
-        //    app.UseStatusCodePagesWithReExecute("/erro/{0}");
-        //    app.UseHsts();
-        //}
-        //else
-        //    app.UseDeveloperExceptionPage();
+        if (!env.IsDevelopment())
+        {
+            app.UseExceptionHandler("/erro/500");
+            app.UseStatusCodePagesWithReExecute("/erro/{0}");
+            app.UseHsts();
+        }
+        else
+            app.UseDeveloperExceptionPage();
 
-        app.UseExceptionHandler("/erro/500");
-        app.UseStatusCodePagesWithReExecute("/erro/{0}");
+        //app.UseExceptionHandler("/erro/500");
+        //app.UseStatusCodePagesWithReExecute("/erro/{0}");
         app.UseHsts();
 
         app.UseHttpsRedirection();
@@ -37,6 +37,6 @@ public static class WebAppConfig
 
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+            pattern: "{controller=Catalog}/{action=Index}/{id?}");
     }
 }
