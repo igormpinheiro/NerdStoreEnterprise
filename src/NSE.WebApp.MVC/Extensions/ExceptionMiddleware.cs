@@ -1,4 +1,5 @@
-﻿using Refit;
+﻿using Polly.CircuitBreaker;
+using Refit;
 using System.Net;
 
 namespace NSE.WebApp.MVC.Extensions;
@@ -30,6 +31,11 @@ public class ExceptionMiddleware
 		{
             await HandleRequestExceptionAsync(context, ex.StatusCode);
         }
+        catch (BrokenCircuitException)
+		{
+            HandleCircuitBreakerExceptionAsync(context);
+            //await HandleRequestExceptionAsync(context, HttpStatusCode.ServiceUnavailable);
+        }
 
     }
 
@@ -44,4 +50,9 @@ public class ExceptionMiddleware
 		context.Response.StatusCode = (int)statusCode;
 		return Task.CompletedTask;
 	}
+
+    private static void HandleCircuitBreakerExceptionAsync(HttpContext context)
+    {
+        context.Response.Redirect("/sistema-indisponivel");
+    }
 }
