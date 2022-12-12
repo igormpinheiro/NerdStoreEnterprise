@@ -1,12 +1,13 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NSE.Identidade.API.DTOs;
+using NSE.WebAPI.Core.Controllers;
 using NSE.WebAPI.Core.Identity;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace NSE.Identidade.API.Controllers;
 
@@ -41,11 +42,11 @@ public class AuthController : MainController
 
         if (result.IsLockedOut)
         {
-            AdicionarErroProcessamento("Usuário temporariamente bloqueado por tentativas inválidas");
+            AddErrorToStack("Usuário temporariamente bloqueado por tentativas inválidas");
             return CustomResponse();
         }
 
-        AdicionarErroProcessamento("Usuário ou Password incorretos");
+        AddErrorToStack("Usuário ou Password incorretos");
         return CustomResponse();
     }
 
@@ -69,7 +70,7 @@ public class AuthController : MainController
 
         foreach (var error in result.Errors)
         {
-            AdicionarErroProcessamento(error.Description);
+            AddErrorToStack(error.Description);
         }
 
         return CustomResponse();
@@ -108,7 +109,6 @@ public class AuthController : MainController
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature)
         });
-
 
         var encodedToken = tokenHandler.WriteToken(token);
 

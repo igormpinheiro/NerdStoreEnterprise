@@ -1,8 +1,9 @@
 ﻿using FluentValidation.Results;
+using MediatR;
 
 namespace NSE.Core.Messages;
 
-public abstract class Command : Message
+public abstract class Command : Message, IRequest<ValidationResult>
 {
     public DateTime TimeStamp { get; private set; }
 
@@ -16,16 +17,5 @@ public abstract class Command : Message
     public virtual bool IsValid()
     {
         throw new NotImplementedException();
-    }
-}
-
-public abstract class Message
-{
-    public string MessageType { get; protected set; }
-    public Guid AggregateId { get; protected set; }
-
-    protected Message()
-    {
-        MessageType = GetType().Name;
     }
 }

@@ -3,19 +3,21 @@ using Microsoft.EntityFrameworkCore;
 using NSE.Cliente.API.Models;
 using NSE.Core.Data;
 using NSE.Core.DomainObjects;
+using NSE.Core.Mediator;
+using NSE.Core.Messages;
 using System.ComponentModel.DataAnnotations;
 
 namespace NSE.Cliente.API.Data;
 
 public sealed class CustomerContext : DbContext, IUnitOfWork
 {
-    //private readonly IMediatorHandler _mediatorHandler;
-    //private readonly IMediator _mediator;
+    private readonly IMediatorHandler _mediatorHandler;
+    private readonly IMediator _mediator;
 
-    public CustomerContext(DbContextOptions<CustomerContext> options)//, IMediator mediator)
+    public CustomerContext(DbContextOptions<CustomerContext> options, IMediator mediator)
         : base(options)
     {
-        //_mediator = mediator;
+        _mediator = mediator;
         ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         ChangeTracker.AutoDetectChangesEnabled = false;
     }
@@ -25,8 +27,8 @@ public sealed class CustomerContext : DbContext, IUnitOfWork
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //modelBuilder.Ignore<ValidationResult>();
-        //modelBuilder.Ignore<Event>();
+        modelBuilder.Ignore<ValidationResult>();
+        modelBuilder.Ignore<Event>();
 
         foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(
             e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
@@ -41,7 +43,7 @@ public sealed class CustomerContext : DbContext, IUnitOfWork
     public async Task<bool> Commit()
     {
         var success = await base.SaveChangesAsync() > 0;
-        //if (success) await _mediator.PublishEvents(this);
+        if (success) await _mediator.PublishEvents(this);
 
         return success;
     }
@@ -51,27 +53,21 @@ public static class MediatorExtension
 {
     public static async Task PublishEvents<T>(this IMediator mediator, T ctx) where T : DbContext
     {
-        throw new NotImplementedException();
 
-        //var domainEntities = ctx.ChangeTracker
-        //    .Entries<Entity>()
-        //    .Where(x => x.Entity.Notificacoes != null && x.Entity.Notificacoes.Any());
+        var domainEntities = ctx.ChangeTracker
+            .Entries<Entity>()
+            .Where(x => x.Entity.Notificacoes != null && x.Entity.Notificacoes.Any());
 
-        //var domainEvents = domainEntities
-        //    .SelectMany(x => x.Entity.Notificacoes)
-        //    .ToList();
+        var domainEvents = domainEntities
+            .SelectMany(x => x.Entity.Notificacoes)
+            .ToList();
 
-        //domainEntities.ToList()
-        //    .ForEach(entity => entity.Entity.ClearEvents());
+        domainEntities.ToList()
+            .ForEach(entity => entity.Entity.ClearEvents());
 
-        ////var tasks = domainEvents
-        ////    .Select(async (domainEvent) => {
-        ////        await mediator.Publish(domainEvent);
-        ////    });
-
-        //foreach (var task in domainEvents)
-        //{
-        //    await mediator.Publish(task);
-        //}
+        foreach (var task in domainEvents)
+        {
+            await mediator.Publish(task);
+        }
     }
 }

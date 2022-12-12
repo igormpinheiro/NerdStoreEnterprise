@@ -12,14 +12,12 @@ public class Customer : Entity, IAggregateRoot
 
     protected Customer() { }
     
-    public Customer(Guid id, string name, string email, string cpf, bool deleted, Address address)
+    public Customer(Guid id, string name, string email, string cpf)
     {
         Id = id;
         Name = name;
         Email = new Email(email);
         Cpf = new CPF(cpf);
-        Deleted = deleted;
-        Address = address;
     }
 
     public void ChangeEmail(string email)
