@@ -13,6 +13,8 @@ builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
 
 builder.Services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddMessageBusConfiguration(builder.Configuration);
+
 var app = builder.Build();
 
 app.UseApiConfiguration();

@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using NSE.Core.Messages.Integration;
 using NSE.Identidade.API.DTOs;
+using NSE.MessageBus;
 using NSE.WebAPI.Core.Controllers;
 using NSE.WebAPI.Core.Identity;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,14 +19,17 @@ public class AuthController : MainController
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly AppSettings _appSettings;
+    private IMessageBus _bus;
 
     public AuthController(SignInManager<IdentityUser> signInManager,
         UserManager<IdentityUser> userManager,
-        IOptions<AppSettings> appSettings)
+        IOptions<AppSettings> appSettings,
+        IMessageBus bus)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _appSettings = appSettings.Value;
+        _bus = bus;
     }
 
     [HttpPost("auth")]
@@ -66,7 +71,17 @@ public class AuthController : MainController
         var result = await _userManager.CreateAsync(user, newUser.Password);
 
         if (result.Succeeded)
+        {
+            var customerResult = await AddCustomer(newUser);
+
+            if (!customerResult.ValidationResult.IsValid)
+            {
+                await _userManager.DeleteAsync(user);
+                return CustomResponse(customerResult.ValidationResult);
+            }
+
             return CustomResponse(await GerarJwt(newUser.Email));
+        }
 
         foreach (var error in result.Errors)
         {
@@ -75,6 +90,25 @@ public class AuthController : MainController
 
         return CustomResponse();
     }
+
+    private async Task<ResponseMessage> AddCustomer(NewUserDTO newUser)
+    {
+        var user = await _userManager.FindByEmailAsync(newUser.Email);
+
+        var userRegistered = new UserRegisteredIntegrationEvent(
+            Guid.Parse(user.Id), newUser.Name, newUser.Email, newUser.Cpf);
+        try
+        {
+            return await _bus.RequestAsync<UserRegisteredIntegrationEvent, ResponseMessage>(userRegistered);
+        }
+        catch
+        {
+            await _userManager.DeleteAsync(user);
+            throw;
+        }
+    }
+
+    #region JWT
 
     private async Task<UserLoginResponseDTO> GerarJwt(string email)
     {
@@ -133,4 +167,6 @@ public class AuthController : MainController
                                  new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
             .TotalSeconds);
     }
+
+    #endregion JWT
 }

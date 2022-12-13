@@ -8,7 +8,7 @@ namespace NSE.Catalogo.API.Data.Repositories
     {
         private readonly CatalogContext _context;
 
-        public IUnitOfWork unitOfWork => _context;
+        public IUnitOfWork UnitOfWork => _context;
 
         public ProductRepository(CatalogContext context)
         {
