@@ -11,17 +11,30 @@ public class UserRegisteredIntegrationHandler : BackgroundService
     private readonly IMessageBus _bus;
     private readonly IServiceProvider _serviceProvider;
 
-    public UserRegisteredIntegrationHandler(IServiceProvider serviceProvider, 
+    public UserRegisteredIntegrationHandler(IServiceProvider serviceProvider,
         IMessageBus bus)
     {
         _serviceProvider = serviceProvider;
         _bus = bus;
     }
 
+    private void SetResponder()
+    {
+        _bus.RespondAsync<UserRegisteredIntegrationEvent, ResponseMessage>(
+            async request => await NewCustomer(request));
+
+        _bus.AdvancedBus.Connected += OnConnect;
+    }
+
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return _bus.RespondAsync<UserRegisteredIntegrationEvent, ResponseMessage>(
-            async request => await NewCustomer(request));
+        SetResponder();
+        return Task.CompletedTask;
+    }
+
+    private void OnConnect(object s, EventArgs e)
+    {
+        SetResponder();
     }
 
     private async Task<ResponseMessage> NewCustomer(UserRegisteredIntegrationEvent message)
@@ -35,7 +48,7 @@ public class UserRegisteredIntegrationHandler : BackgroundService
             var mediator = scope.ServiceProvider.GetRequiredService<IMediatorHandler>();
             success = await mediator.SendCommand(customerCommand);
         }
-        
+
         return new ResponseMessage(success);
     }
 }
